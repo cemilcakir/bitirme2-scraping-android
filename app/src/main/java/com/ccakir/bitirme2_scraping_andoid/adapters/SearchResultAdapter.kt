@@ -1,12 +1,14 @@
 package com.ccakir.bitirme2_scraping_andoid.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.ccakir.bitirme2_scraping_andoid.R
+import com.ccakir.bitirme2_scraping_andoid.activities.DetailsActivity
 import com.ccakir.bitirme2_scraping_andoid.models.SearchResultModel
 import com.koushikdutta.ion.Ion
 import kotlinx.android.synthetic.main.cell_search_result.view.*
@@ -45,7 +47,9 @@ class SearchResultAdapter(private var result: ArrayList<SearchResultModel>, priv
         txtSite.text = product.siteName
 
         holder.cardView.setOnClickListener {
-            println(product)
+            val i = Intent(context, DetailsActivity::class.java)
+            DetailsActivity.productDetailLink = product.productLink
+            context.startActivity(i)
         }
     }
 

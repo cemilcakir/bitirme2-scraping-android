@@ -20,13 +20,108 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:fitsSystemWindows="true"
-            app:headerLayout="@layout/nav_header_main">
+            app:headerLayout="@layout/nav_header_main"
+            android:background="@color/teal_light_1">
 
-        <android.support.v7.widget.RecyclerView
-                android:id="@+id/recyclerHistory"
+        <android.support.v4.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="@dimen/nav_header_height"/>
+                android:layout_marginTop="@dimen/nav_header_height">
+
+            <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                <LinearLayout
+                        android:id="@+id/layoutQueries"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        android:layout_marginTop="10dp">
+
+                    <ImageView
+                            android:id="@+id/imgQueries"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/ic_history"
+                            android:layout_marginLeft="16dp"
+                            android:layout_gravity="center"/>
+
+                    <TextView
+                            android:id="@+id/txtQueries"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/queries"
+                            android:textColor="#FFF"
+                            android:textSize="16sp"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="16dp"/>
+
+                    <ImageView
+                            android:id="@+id/imgQueriesExpandCollapse"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/ic_show_less"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="60dp" />
+
+                </LinearLayout>
+
+                <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerQueries"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/layoutQueries"
+                        android:layout_marginTop="10dp"/>
+
+                <LinearLayout
+                        android:id="@+id/layoutProducts"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/recyclerQueries"
+                        android:layout_marginTop="10dp">
+
+                    <ImageView
+                            android:id="@+id/imgProducts"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/ic_history"
+                            android:layout_marginLeft="16dp"
+                            android:layout_gravity="center"/>
+
+                    <TextView
+                            android:id="@+id/txtProducts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/products"
+                            android:textColor="#FFF"
+                            android:textSize="16sp"
+                            android:layout_marginLeft="16dp"
+                            android:layout_gravity="center"/>
+
+                    <ImageView
+                            android:id="@+id/imgProductsExpandCollapse"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/ic_show_less"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="75dp" />
+
+                </LinearLayout>
+
+                <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerProducts"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/layoutProducts"
+                        android:layout_marginTop="10dp"/>
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.v4.widget.NestedScrollView>
 
     </android.support.design.widget.NavigationView>
 

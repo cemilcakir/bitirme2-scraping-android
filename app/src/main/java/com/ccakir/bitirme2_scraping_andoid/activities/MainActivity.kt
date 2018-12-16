@@ -12,6 +12,7 @@ import android.support.v7.widget.SearchView
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.ccakir.bitirme2_scraping_andoid.R
 import com.ccakir.bitirme2_scraping_andoid.adapters.HistoryAdapter
 import com.ccakir.bitirme2_scraping_andoid.adapters.SearchResultAdapter
@@ -30,12 +31,20 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var recyclerHistory: RecyclerView
-    private lateinit var adapterHistory: HistoryAdapter
+    companion object {
+        var wordsForSearch: String? = null
+    }
+
+    private lateinit var recyclerQueries: RecyclerView
+    private lateinit var adapterQueries: HistoryAdapter
+    private lateinit var recyclerProducts: RecyclerView
+    private lateinit var adapterProducts: HistoryAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var recyclerResult: RecyclerView
     private lateinit var adapterResult: SearchResultAdapter
     private lateinit var dialog: Dialog
+    private var isQueriesShowing = true
+    private var isProductsShowing = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,14 +59,22 @@ class MainActivity : AppCompatActivity() {
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
-        adapterHistory = HistoryAdapter(ArrayList(), this)
+        adapterQueries = HistoryAdapter(ArrayList(), this)
+        adapterProducts = HistoryAdapter(ArrayList(), this)
         adapterResult = SearchResultAdapter(ArrayList(), this)
 
         viewManager = LinearLayoutManager(this)
-        recyclerHistory = nav_view.findViewById(R.id.recyclerHistory)
-        recyclerHistory.setHasFixedSize(true)
-        recyclerHistory.layoutManager = viewManager
-        recyclerHistory.adapter = adapterHistory
+
+        recyclerQueries = nav_view.findViewById(R.id.recyclerQueries)
+        recyclerQueries.setHasFixedSize(true)
+        recyclerQueries.layoutManager = viewManager
+        recyclerQueries.adapter = adapterQueries
+
+        viewManager = LinearLayoutManager(this)
+        recyclerProducts = nav_view.findViewById(R.id.recyclerProducts)
+        recyclerProducts.setHasFixedSize(true)
+        recyclerProducts.layoutManager = viewManager
+        recyclerProducts.adapter = adapterProducts
 
         viewManager = LinearLayoutManager(this)
         recyclerResult = findViewById(R.id.recyclerResult)
@@ -70,6 +87,32 @@ class MainActivity : AppCompatActivity() {
         dialog.setCancelable(false)
         val dialogView = LayoutInflater.from(this).inflate(R.layout.custom_dialog_loading, null)
         dialog.setContentView(dialogView)
+
+        layoutQueries.setOnClickListener {
+            if(isQueriesShowing) {
+                recyclerQueries.visibility = View.GONE
+                imgQueriesExpandCollapse.background = resources.getDrawable(R.drawable.ic_show_more)
+            }
+            else{
+                recyclerQueries.visibility = View.VISIBLE
+                imgQueriesExpandCollapse.background = resources.getDrawable(R.drawable.ic_show_less)
+            }
+
+            isQueriesShowing = !isQueriesShowing
+        }
+
+        layoutProducts.setOnClickListener {
+            if(isProductsShowing){
+                recyclerProducts.visibility = View.GONE
+                imgProductsExpandCollapse.background = resources.getDrawable(R.drawable.ic_show_more)
+            }
+            else {
+                recyclerProducts.visibility = View.VISIBLE
+                imgProductsExpandCollapse.background = resources.getDrawable(R.drawable.ic_show_less)
+            }
+
+            isProductsShowing = !isProductsShowing
+        }
 
         thread {
             getHistory()
@@ -140,11 +183,24 @@ class MainActivity : AppCompatActivity() {
                 val queries = adapter.fromJson(response.result["searchQueries"].asJsonArray.toString()) as ArrayList<HistoryModel>
                 val products = adapter.fromJson(response.result["searchedProducts"].asJsonArray.toString()) as ArrayList<HistoryModel>
 
-                queries.addAll(products)
+                val queriesTrimmed: ArrayList<HistoryModel> = ArrayList()
+                val productsTrimmed: ArrayList<HistoryModel> = ArrayList()
+
+                queries.forEach { query ->
+                    if(!queriesTrimmed.contains(query) && queriesTrimmed.size <= 5)
+                        queriesTrimmed.add(query)
+                }
+
+                products.forEach { product ->
+                    if(!productsTrimmed.contains(product) && productsTrimmed.size <= 5)
+                        productsTrimmed.add(product)
+                }
 
                 runOnUiThread {
-                    adapterHistory.removeAll()
-                    adapterHistory.addAll(queries)
+                    adapterQueries.removeAll()
+                    adapterQueries.addAll(queriesTrimmed)
+                    adapterProducts.removeAll()
+                    adapterProducts.addAll(productsTrimmed)
                 }
             }
             else{
@@ -160,13 +216,19 @@ class MainActivity : AppCompatActivity() {
     fun getProducts(searchQuery: String?) {
         runOnUiThread {
             dialog.show()
+
+            if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+                drawer_layout.closeDrawer(GravityCompat.START)
+            }
         }
         var url = ""
 
-        url = if(searchQuery.isNullOrEmpty())
+        url = if(searchQuery.isNullOrEmpty() && wordsForSearch.isNullOrEmpty())
             "http://35.240.12.190:3000/api/history/search"
-        else
+        else if(wordsForSearch.isNullOrEmpty())
             "http://35.240.12.190:3000/api/search?q=${URLEncoder.encode(searchQuery)}"
+        else
+            "http://35.240.12.190:3000/api/search?q=${URLEncoder.encode(wordsForSearch)}"
 
         try {
             val response = Ion.with(this)
@@ -188,7 +250,7 @@ class MainActivity : AppCompatActivity() {
 
                 var products:ArrayList<SearchResultModel> = ArrayList()
 
-                if(searchQuery.isNullOrEmpty())
+                if(searchQuery.isNullOrEmpty() && wordsForSearch.isNullOrEmpty())
                     products = adapter.fromJson(response.result["data"].asJsonArray.toString()) as ArrayList<SearchResultModel>
                 else {
                     products = adapter.fromJson(response.result["response"].asJsonArray.toString()) as ArrayList<SearchResultModel>

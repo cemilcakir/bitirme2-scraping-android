@@ -1,13 +1,17 @@
 package com.ccakir.bitirme2_scraping_andoid.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import com.ccakir.bitirme2_scraping_andoid.R
+import com.ccakir.bitirme2_scraping_andoid.activities.DetailsActivity
+import com.ccakir.bitirme2_scraping_andoid.activities.MainActivity
 import com.ccakir.bitirme2_scraping_andoid.models.HistoryModel
+import kotlin.concurrent.thread
 
 class HistoryAdapter(private var history: ArrayList<HistoryModel>,private val context: Context): RecyclerView.Adapter<HistoryAdapter.ViewHolder>(){
 
@@ -31,7 +35,16 @@ class HistoryAdapter(private var history: ArrayList<HistoryModel>,private val co
             txtHistory.text = if(log.product.length > 20) log.product.substring(0, 20) + "..." else log.product
 
         holder.cardView.setOnClickListener {
-            println(log)
+            if(!log.product.isNullOrEmpty() && !log.link.isNullOrEmpty()) {
+                val i = Intent(context, DetailsActivity::class.java)
+                DetailsActivity.productDetailLink = log.link
+                context.startActivity(i)
+            }
+            else if(!log.query.isNullOrEmpty()) {
+                thread {
+                    (context as MainActivity).getProducts(log.query)
+                }
+            }
         }
     }
 
