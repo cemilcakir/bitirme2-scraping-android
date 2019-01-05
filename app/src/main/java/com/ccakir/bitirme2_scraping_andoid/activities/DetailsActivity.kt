@@ -5,12 +5,15 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v7.app.ActionBar
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import com.ccakir.bitirme2_scraping_andoid.R
 import com.ccakir.bitirme2_scraping_andoid.adapters.DetailAdapter
 import com.ccakir.bitirme2_scraping_andoid.models.DetailModel
@@ -44,8 +47,22 @@ class DetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details)
 
+        val actionBar = supportActionBar
+        actionBar?.setDisplayShowCustomEnabled(true)
+        actionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM;
+        actionBar?.setCustomView(layoutInflater.inflate(R.layout.custom_title, null),
+            ActionBar.LayoutParams(
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.MATCH_PARENT,
+                Gravity.CENTER
+            )
+        )
+
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val txtTitle: TextView? = actionBar?.customView?.findViewById(R.id.txtTitle)
+        txtTitle?.text = resources.getString(R.string.detail_activity)
 
         adapterDetails = DetailAdapter(ArrayList(), this)
 
@@ -85,7 +102,7 @@ class DetailsActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
+        menuInflater.inflate(R.menu.detail, menu)
 
         val searchItem = menu!!.findItem(R.id.search)
         val searchView = searchItem.actionView as SearchView
@@ -109,13 +126,12 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     fun getDetails() {
-        val url = "http://35.240.12.190:3000/api/search/detail?url=$productDetailLink"
+        val url = "http://192.168.1.118:3000/api/search/detail?url=$productDetailLink"
 
         try {
             val response = Ion.with(this)
                 .load(url)
-                .asJsonObject()
-                .withResponse()
+                .asJsonObject().withResponse()
                 .get()
 
             if(response.headers.code() == 200){

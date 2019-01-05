@@ -64,4 +64,6 @@ class SearchResultAdapter(private var result: ArrayList<SearchResultModel>, priv
         result = ArrayList()
         notifyDataSetChanged()
     }
+
+    fun getAll() = result
 }

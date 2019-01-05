@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swtUp"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="Fiyata Göre Artan"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:thumbTint="@color/black"
+            app:trackTint="#CCC"/>
+
+    <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swtDown"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="Fiyata Göre Azalan"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@id/swtUp"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"
+            app:thumbTint="@color/black"
+            app:trackTint="#CCC"/>
+
+    <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swtHepsiburada"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="hepsiburada"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@id/swtDown"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"
+            app:thumbTint="@color/black"
+            app:trackTint="#CCC"/>
+
+    <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swtN11"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="n11"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@id/swtHepsiburada"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"
+            app:thumbTint="@color/black"
+            app:trackTint="#CCC"/>
+
+    <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swtTeknosa"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="teknosa"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@id/swtN11"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"
+            app:thumbTint="@color/black"
+            app:trackTint="#CCC"/>
+
+    <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swtKitapyurdu"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="kitapyurdu"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@id/swtTeknosa"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"
+            app:thumbTint="@color/black"
+            app:trackTint="#CCC"/>
+
+    <Button
+            android:id="@+id/btnFilter"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintHorizontal_weight="1"
+            android:text="Filtrele"
+            app:layout_constraintTop_toBottomOf="@id/swtKitapyurdu"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"
+            android:background="#FFF"
+            android:textColor="#029e0a"
+    />
+
+    <Button
+            android:id="@+id/btnClearFilter"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content"
+            android:text="Temizle"
+            app:layout_constraintTop_toBottomOf="@id/swtKitapyurdu"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginTop="10dp"
+            android:background="#FFF"
+            android:textColor="#ff0000"
+    />
+
+</android.support.constraint.ConstraintLayout>

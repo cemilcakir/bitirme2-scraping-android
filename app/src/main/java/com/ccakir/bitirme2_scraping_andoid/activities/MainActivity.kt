@@ -1,5 +1,6 @@
 package com.ccakir.bitirme2_scraping_andoid.activities
 
+import android.support.v7.app.ActionBar
 import android.app.Dialog
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -9,10 +10,10 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
+import android.widget.Button
+import android.support.v7.widget.SwitchCompat
+import android.widget.TextView
 import com.ccakir.bitirme2_scraping_andoid.R
 import com.ccakir.bitirme2_scraping_andoid.adapters.HistoryAdapter
 import com.ccakir.bitirme2_scraping_andoid.adapters.SearchResultAdapter
@@ -25,7 +26,6 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import java.lang.Exception
 import java.net.URLEncoder
 import kotlin.concurrent.thread
 
@@ -42,14 +42,32 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var recyclerResult: RecyclerView
     private lateinit var adapterResult: SearchResultAdapter
+    private lateinit var filteredResult: ArrayList<SearchResultModel>
+    private lateinit var originalProducts: ArrayList<SearchResultModel>
     private lateinit var dialog: Dialog
+    private lateinit var filterDialog: Dialog
+    private lateinit var filters: ArrayList<String>
     private var isQueriesShowing = true
     private var isProductsShowing = true
+    private var txtTitle: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        val actionBar = supportActionBar
+        actionBar?.setDisplayShowCustomEnabled(true)
+        actionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM;
+        actionBar?.setCustomView(layoutInflater.inflate(R.layout.custom_title, null),
+            ActionBar.LayoutParams(
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.MATCH_PARENT,
+                Gravity.CENTER
+            )
+        )
+        txtTitle = actionBar?.customView?.findViewById(R.id.txtTitle)
+        txtTitle?.text = resources.getString(R.string.name)
 
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar,
@@ -58,6 +76,9 @@ class MainActivity : AppCompatActivity() {
         )
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
+
+        filters = arrayListOf()
+        filteredResult = arrayListOf()
 
         adapterQueries = HistoryAdapter(ArrayList(), this)
         adapterProducts = HistoryAdapter(ArrayList(), this)
@@ -121,6 +142,136 @@ class MainActivity : AppCompatActivity() {
         thread {
             getProducts(null)
         }
+
+        imgFilter.setOnClickListener {
+            filterDialog = Dialog(this)
+            val filterDialogView = LayoutInflater.from(this).inflate(R.layout.custom_search_view, null)
+
+            val btnFilter = filterDialogView.findViewById<Button>(R.id.btnFilter)
+            val btnClearFilter = filterDialogView.findViewById<Button>(R.id.btnClearFilter)
+            val swtHepsiburada = filterDialogView.findViewById<SwitchCompat>(R.id.swtHepsiburada)
+            val swtN11 = filterDialogView.findViewById<SwitchCompat>(R.id.swtN11)
+            val swtTeknosa = filterDialogView.findViewById<SwitchCompat>(R.id.swtTeknosa)
+            val swtKitapyurdu = filterDialogView.findViewById<SwitchCompat>(R.id.swtKitapyurdu)
+            val swtDown = filterDialogView.findViewById<SwitchCompat>(R.id.swtDown)
+            val swtUp = filterDialogView.findViewById<SwitchCompat>(R.id.swtUp)
+
+            if(filters.contains("hepsiburada"))
+                swtHepsiburada.isChecked = true
+            if(filters.contains("n11"))
+                swtN11.isChecked = true
+            if(filters.contains("teknosa"))
+                swtTeknosa.isChecked = true
+            if(filters.contains("kitapyurdu"))
+                swtKitapyurdu.isChecked = true
+            if(filters.contains("up"))
+                swtUp.isChecked = true
+            if(filters.contains("down"))
+                swtDown.isChecked = true
+
+            swtDown.setOnCheckedChangeListener { buttonView, isChecked ->
+                if(isChecked && swtUp.isChecked)
+                    swtUp.isChecked = false
+                if(isChecked)
+                    filters.add("down")
+                else
+                    filters.remove("down")
+            }
+
+            swtUp.setOnCheckedChangeListener { buttonView, isChecked ->
+                if(isChecked && swtDown.isChecked)
+                    swtDown.isChecked = false
+                if(isChecked)
+                    filters.add("up")
+                else
+                    filters.remove("up")
+            }
+
+            swtHepsiburada.setOnCheckedChangeListener { buttonView, isChecked ->
+                if(isChecked)
+                    filters.add("hepsiburada")
+                else
+                    filters.remove("hepsiburada")
+            }
+
+            swtN11.setOnCheckedChangeListener { buttonView, isChecked ->
+                if(isChecked)
+                    filters.add("n11")
+                else
+                    filters.remove("n11")
+            }
+
+            swtTeknosa.setOnCheckedChangeListener { buttonView, isChecked ->
+                if(isChecked)
+                    filters.add("teknosa")
+                else
+                    filters.remove("teknosa")
+            }
+
+            swtKitapyurdu.setOnCheckedChangeListener { buttonView, isChecked ->
+                if(isChecked)
+                    filters.add("kitapyurdu")
+                else
+                    filters.remove("kitapyurdu")
+            }
+
+           btnFilter.setOnClickListener {
+               if(filters.size > 0) {
+                   filteredResult = arrayListOf()
+                   originalProducts.forEach { product ->
+                       if(filters.contains("hepsiburada") && product.siteName == "hepsiburada")
+                           filteredResult.add(product)
+                       if(filters.contains("n11") && product.siteName == "n11")
+                           filteredResult.add(product)
+                       if(filters.contains("teknosa") && product.siteName == "teknosa")
+                           filteredResult.add(product)
+                       if(filters.contains("kitapyurdu") && product.siteName == "kitapyurdu")
+                           filteredResult.add(product)
+                   }
+
+                   if(filters.contains("up"))
+                       if(filteredResult.size > 0)
+                           filteredResult = ArrayList(filteredResult.sortedWith(compareBy { product ->
+                               product.productPrice.trim().replace(",","").replace(".", "").toDouble()
+                           }))
+                       else
+                           filteredResult = ArrayList(adapterResult.getAll().sortedWith(compareBy { product ->
+                               product.productPrice.trim().replace(",","").replace(".", "").toDouble()
+                           }))
+                   if(filters.contains("down"))
+                       if(filteredResult.size > 0)
+                           filteredResult = ArrayList(filteredResult.sortedWith(compareBy { product ->
+                               product.productPrice.trim().replace(",","").replace(".", "").toDouble()
+                           }).reversed())
+                       else
+                           filteredResult = ArrayList(adapterResult.getAll().sortedWith(compareBy { product ->
+                               product.productPrice.trim().replace(",","").replace(".", "").toDouble()
+                           }).reversed())
+
+                   adapterResult.removeAll()
+                   adapterResult.addAll(filteredResult)
+               }
+               else {
+                   filteredResult = arrayListOf()
+                   filters = arrayListOf()
+                   adapterResult.removeAll()
+                   adapterResult.addAll(originalProducts)
+               }
+
+               filterDialog.dismiss()
+            }
+
+            btnClearFilter.setOnClickListener {
+                filteredResult = arrayListOf()
+                filters = arrayListOf()
+                adapterResult.removeAll()
+                adapterResult.addAll(originalProducts)
+                filterDialog.dismiss()
+            }
+
+            filterDialog.setContentView(filterDialogView)
+            filterDialog.show()
+        }
     }
 
     override fun onBackPressed() {
@@ -147,6 +298,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onQueryTextSubmit(query: String): Boolean {
                 getProducts(query)
+                searchView.onActionViewCollapsed()
                 return false
             }
         })
@@ -165,7 +317,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getHistory() {
-        val url = "http://35.240.12.190:3000/api/history"
+        val url = "http://192.168.1.118:3000/api/history"
 
         try {
             val response = Ion.with(this)
@@ -224,11 +376,11 @@ class MainActivity : AppCompatActivity() {
         var url = ""
 
         url = if(searchQuery.isNullOrEmpty() && wordsForSearch.isNullOrEmpty())
-            "http://35.240.12.190:3000/api/history/search"
+            "http://192.168.1.118:3000/api/history/search"
         else if(wordsForSearch.isNullOrEmpty())
-            "http://35.240.12.190:3000/api/search?q=${URLEncoder.encode(searchQuery)}"
+            "http://192.168.1.118:3000/api/search?q=${URLEncoder.encode(searchQuery)}"
         else
-            "http://35.240.12.190:3000/api/search?q=${URLEncoder.encode(wordsForSearch)}"
+            "http://192.168.1.118:3000/api/search?q=${URLEncoder.encode(wordsForSearch)}"
 
         try {
             val response = Ion.with(this)
@@ -250,15 +402,20 @@ class MainActivity : AppCompatActivity() {
 
                 var products:ArrayList<SearchResultModel> = ArrayList()
 
-                if(searchQuery.isNullOrEmpty() && wordsForSearch.isNullOrEmpty())
+                if(searchQuery.isNullOrEmpty() && wordsForSearch.isNullOrEmpty()) {
                     products = adapter.fromJson(response.result["data"].asJsonArray.toString()) as ArrayList<SearchResultModel>
+                }
                 else {
+                    runOnUiThread {
+                        txtTitle?.text = if(!searchQuery.isNullOrEmpty()) searchQuery else wordsForSearch
+                    }
                     products = adapter.fromJson(response.result["response"].asJsonArray.toString()) as ArrayList<SearchResultModel>
                     getHistory()
                 }
                 runOnUiThread {
                     adapterResult.removeAll()
                     adapterResult.addAll(products)
+                    originalProducts = products
                 }
             }
             else{
