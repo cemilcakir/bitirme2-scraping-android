@@ -13,6 +13,7 @@ import android.support.v7.widget.SearchView
 import android.view.*
 import android.widget.Button
 import android.support.v7.widget.SwitchCompat
+import android.widget.EditText
 import android.widget.TextView
 import com.ccakir.bitirme2_scraping_andoid.R
 import com.ccakir.bitirme2_scraping_andoid.adapters.HistoryAdapter
@@ -47,6 +48,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dialog: Dialog
     private lateinit var filterDialog: Dialog
     private lateinit var filters: ArrayList<String>
+    private var min = 0
+    private var max = 0
     private var isQueriesShowing = true
     private var isProductsShowing = true
     private var txtTitle: TextView? = null
@@ -155,6 +158,8 @@ class MainActivity : AppCompatActivity() {
             val swtKitapyurdu = filterDialogView.findViewById<SwitchCompat>(R.id.swtKitapyurdu)
             val swtDown = filterDialogView.findViewById<SwitchCompat>(R.id.swtDown)
             val swtUp = filterDialogView.findViewById<SwitchCompat>(R.id.swtUp)
+            val txtMin = filterDialogView.findViewById<EditText>(R.id.txtMin)
+            val txtMax = filterDialogView.findViewById<EditText>(R.id.txtMax)
 
             if(filters.contains("hepsiburada"))
                 swtHepsiburada.isChecked = true
@@ -168,6 +173,8 @@ class MainActivity : AppCompatActivity() {
                 swtUp.isChecked = true
             if(filters.contains("down"))
                 swtDown.isChecked = true
+            txtMin.setText(min.toString())
+            txtMax.setText(max.toString())
 
             swtDown.setOnCheckedChangeListener { buttonView, isChecked ->
                 if(isChecked && swtUp.isChecked)
@@ -216,6 +223,8 @@ class MainActivity : AppCompatActivity() {
             }
 
            btnFilter.setOnClickListener {
+               max = if(txtMin.text.toString().toInt() > txtMax.text.toString().toInt()) txtMin.text.toString().toInt() else txtMax.text.toString().toInt()
+               min = if(txtMax.text.toString().toInt() > txtMin.text.toString().toInt()) txtMin.text.toString().toInt() else txtMax.text.toString().toInt()
                if(filters.size > 0) {
                    filteredResult = arrayListOf()
                    originalProducts.forEach { product ->
@@ -228,6 +237,8 @@ class MainActivity : AppCompatActivity() {
                        if(filters.contains("kitapyurdu") && product.siteName == "kitapyurdu")
                            filteredResult.add(product)
                    }
+
+                   filteredResult = filterByPrice(filteredResult)
 
                    if(filters.contains("up"))
                        if(filteredResult.size > 0)
@@ -251,9 +262,15 @@ class MainActivity : AppCompatActivity() {
                    adapterResult.removeAll()
                    adapterResult.addAll(filteredResult)
                }
+               else if(min != 0 || max != 0) {
+                   adapterResult.removeAll()
+                   adapterResult.addAll(filterByPrice(originalProducts))
+               }
                else {
                    filteredResult = arrayListOf()
                    filters = arrayListOf()
+                   min = 0
+                   max = 0
                    adapterResult.removeAll()
                    adapterResult.addAll(originalProducts)
                }
@@ -264,6 +281,8 @@ class MainActivity : AppCompatActivity() {
             btnClearFilter.setOnClickListener {
                 filteredResult = arrayListOf()
                 filters = arrayListOf()
+                min = 0
+                max = 0
                 adapterResult.removeAll()
                 adapterResult.addAll(originalProducts)
                 filterDialog.dismiss()
@@ -317,7 +336,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getHistory() {
-        val url = "http://192.168.1.118:3000/api/history"
+        val url = "http://35.240.12.190:3000/api/history"
 
         try {
             val response = Ion.with(this)
@@ -376,11 +395,11 @@ class MainActivity : AppCompatActivity() {
         var url = ""
 
         url = if(searchQuery.isNullOrEmpty() && wordsForSearch.isNullOrEmpty())
-            "http://192.168.1.118:3000/api/history/search"
+            "http://35.240.12.190:3000/api/history/search"
         else if(wordsForSearch.isNullOrEmpty())
-            "http://192.168.1.118:3000/api/search?q=${URLEncoder.encode(searchQuery)}"
+            "http://35.240.12.190:3000/api/search?q=${URLEncoder.encode(searchQuery)}"
         else
-            "http://192.168.1.118:3000/api/search?q=${URLEncoder.encode(wordsForSearch)}"
+            "http://35.240.12.190:3000/api/search?q=${URLEncoder.encode(wordsForSearch)}"
 
         try {
             val response = Ion.with(this)
@@ -426,5 +445,24 @@ class MainActivity : AppCompatActivity() {
             println(error)
             Snackbar.make(activityMain, "Sorry.", Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    private fun filterByPrice(products: ArrayList<SearchResultModel>): ArrayList<SearchResultModel> {
+        val filteredResult: ArrayList<SearchResultModel> = arrayListOf()
+
+        products.forEach { product ->
+            val price = product.productPrice.trim().split(",")[0].replace(".","").toInt()
+            if(price >= min) {
+                if(max > 0) {
+                    if(price <= max) {
+                        filteredResult.add(product)
+                    }
+                }
+                else {
+                    filteredResult.add(product)
+                }
+            }
+        }
+        return filteredResult
     }
 }

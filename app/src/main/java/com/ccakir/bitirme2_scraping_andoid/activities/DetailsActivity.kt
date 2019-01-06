@@ -126,7 +126,7 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     fun getDetails() {
-        val url = "http://192.168.1.118:3000/api/search/detail?url=$productDetailLink"
+        val url = "http://35.240.12.190:3000/api/search/detail?url=$productDetailLink"
 
         try {
             val response = Ion.with(this)
